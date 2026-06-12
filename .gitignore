@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# 단, 예시 파일은 올라가야 합니다 (실제 비밀값 없음)
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +41,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/app/generated/prisma
+
+# 내부 설계문서 — 공개 repo에는 올리지 않음
+DESIGN.md

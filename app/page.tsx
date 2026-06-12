@@ -1,65 +1,91 @@
-import Image from "next/image";
+import { addEntry } from "./actions";
+import { prisma } from "@/lib/prisma";
 
-export default function Home() {
+// 이 페이지는 "보일러플레이트가 잘 동작하는지" 보여주는 예제입니다.
+// 마음껏 지우고 여러분의 서비스로 바꿔 시작하세요.
+
+type Entry = { id: number; nickname: string; message: string; createdAt: Date };
+
+async function loadEntries(): Promise<{ entries: Entry[]; error: string | null }> {
+  try {
+    const entries = await prisma.guestbookEntry.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
+    return { entries, error: null };
+  } catch {
+    // DB가 아직 준비되지 않았을 때도 화면은 떠야 하니까, 친절하게 안내만 합니다.
+    return {
+      entries: [],
+      error:
+        "아직 데이터베이스가 준비되지 않았어요. README의 '시작하기'를 따라 .env의 DATABASE_URL을 설정하고 `npx prisma migrate dev`를 실행해 주세요.",
+    };
+  }
+}
+
+export default async function Home() {
+  const { entries, error } = await loadEntries();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="mx-auto max-w-2xl px-6 py-16">
+      <h1 className="text-3xl font-bold tracking-tight">🌱 내 첫 풀스택 앱</h1>
+      <p className="mt-3 text-gray-600 dark:text-gray-300">
+        이 화면이 보이면 보일러플레이트가 잘 돌아가고 있는 거예요. 아래 방명록은{" "}
+        <strong>내 앱 데이터베이스</strong>에 저장됩니다.
+      </p>
+
+      {/* 방명록 입력 — 내 앱 DB(Postgres + Prisma) 사용 */}
+      <form action={addEntry} className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <input
+          name="nickname"
+          placeholder="닉네임"
+          className="rounded-lg border border-gray-300 px-3 py-2 sm:w-32 dark:border-gray-700 dark:bg-gray-900"
+          required
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+        <input
+          name="message"
+          placeholder="한 줄 남기기"
+          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900"
+          required
+        />
+        <button
+          type="submit"
+          className="rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700"
+        >
+          남기기
+        </button>
+      </form>
+
+      {error ? (
+        <p className="mt-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-200">
+          {error}
+        </p>
+      ) : (
+        <ul className="mt-8 space-y-3">
+          {entries.length === 0 && (
+            <li className="text-gray-500">아직 글이 없어요. 첫 글을 남겨보세요!</li>
+          )}
+          {entries.map((e) => (
+            <li
+              key={e.id}
+              className="rounded-lg border border-gray-200 px-4 py-3 dark:border-gray-800"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+              <span className="font-semibold">{e.nickname}</span>{" "}
+              <span className="text-gray-700 dark:text-gray-300">{e.message}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* 회사 데이터는 다른 경로(Metabase API)로 가져옵니다 */}
+      <section className="mt-14 rounded-xl border border-dashed border-gray-300 p-5 text-sm dark:border-gray-700">
+        <h2 className="font-semibold">📊 회사 데이터가 필요하면?</h2>
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
+          매출·셀러·방송·고객 같은 <strong>회사 데이터</strong>는 위 방명록처럼 직접 저장하는 게
+          아니라, <code>lib/metabase.ts</code>를 통해 <strong>Metabase API로 읽어옵니다</strong>.
+          Claude에게 &ldquo;Metabase 카드 123번 결과를 표로 보여줘&rdquo;처럼 요청해 보세요.
+        </p>
+      </section>
+    </main>
   );
 }

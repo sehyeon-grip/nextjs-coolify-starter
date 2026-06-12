@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# 커밋 직전 자동 보안 검사 — 비밀 값이 깃에 올라가는 것을 막습니다.
+# (비전공자 안전장치. 이 파일은 그대로 두세요.)
+#
+# 켜는 법(한 번만):  git config core.hooksPath .githooks
+set -u
+
+red()  { printf "\033[31m%s\033[0m\n" "$1"; }
+yel()  { printf "\033[33m%s\033[0m\n" "$1"; }
+
+problems=0
+
+# 1) .env 류 파일이 통째로 커밋되려는지 확인 (.env.example 은 허용)
+staged_files=$(git diff --cached --name-only --diff-filter=ACM)
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
+  base=$(basename "$f")
+  case "$base" in
+    .env.example) ;;                       # 예시 파일은 OK
+    .env|.env.*|*.env)                       # 실제 비밀 파일
+      red "✗ 비밀 파일이 커밋에 포함됐어요: $f"
+      yel "  → 이 파일은 깃에 올리면 안 됩니다. 'git rm --cached $f' 후 .gitignore 확인."
+      problems=1 ;;
+  esac
+done <<< "$staged_files"
+
+# 2) 코드 안에 박힌 비밀값(키) 패턴 검사 — 새로 추가된 줄만
+added=$(git diff --cached --no-color -U0 -- . ':(exclude).env.example' | grep -E '^\+' | grep -vE '^\+\+\+')
+
+declare -a patterns=(
+  'sk-[A-Za-z0-9]{20,}'                       # OpenAI 류
+  'sk-ant-[A-Za-z0-9_-]{20,}'                 # Anthropic
+  'AKIA[0-9A-Z]{16}'                          # AWS Access Key
+  'AIza[0-9A-Za-z_-]{30,}'                    # Google API Key
+  'xox[baprs]-[0-9A-Za-z-]{10,}'              # Slack token
+  'gh[pousr]_[0-9A-Za-z]{30,}'                # GitHub token
+  'mb_[A-Za-z0-9]{20,}'                       # Metabase API key
+  'eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}' # JWT 류
+  '-----BEGIN [A-Z ]*PRIVATE KEY-----'        # private key
+)
+
+for p in "${patterns[@]}"; do
+  if printf "%s" "$added" | grep -qE -- "$p"; then
+    red "✗ 비밀값으로 보이는 문자열이 코드에 들어있어요. (패턴: $p)"
+    yel "  → 키/비밀번호는 코드에 직접 쓰지 말고 .env 파일에 넣고 process.env 로 불러오세요."
+    problems=1
+  fi
+done
+
+if [ "$problems" -ne 0 ]; then
+  echo
+  red "커밋을 멈췄습니다. 위 문제를 해결한 뒤 다시 커밋해 주세요."
+  yel "막히면 Claude Code에 '커밋이 막혔어, 어떻게 고쳐?' 라고 물어보세요. (--no-verify 로 강제 통과하지 마세요)"
+  exit 1
+fi
+
+exit 0

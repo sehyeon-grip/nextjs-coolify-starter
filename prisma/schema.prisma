@@ -1,0 +1,22 @@
+// Prisma 스키마 — "내 앱이 직접 저장하는 데이터"의 모양을 정의하는 곳입니다.
+// (회사 데이터는 여기 두지 않습니다. 회사 데이터는 Metabase API로만 읽어옵니다.)
+//
+// 모델을 바꾼 뒤에는 이렇게 적용하세요:
+//   npx prisma migrate dev --name 변경내용
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// 예제 모델 — 한 줄 방명록. 자유롭게 고치거나 지우고 시작하세요.
+model GuestbookEntry {
+  id        Int      @id @default(autoincrement())
+  nickname  String
+  message   String
+  createdAt DateTime @default(now())
+}
