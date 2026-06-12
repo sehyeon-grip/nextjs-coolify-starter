@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 // 이 페이지는 "보일러플레이트가 잘 동작하는지" 보여주는 예제입니다.
 // 마음껏 지우고 여러분의 서비스로 바꿔 시작하세요.
 
+// 빌드 때가 아니라 "접속할 때마다" 데이터베이스를 읽게 합니다.
+// (이게 없으면 빌드 시점 상태가 화면에 굳어버립니다)
+export const dynamic = "force-dynamic";
+
 type Entry = { id: number; nickname: string; message: string; createdAt: Date };
 
 async function loadEntries(): Promise<{ entries: Entry[]; error: string | null }> {
