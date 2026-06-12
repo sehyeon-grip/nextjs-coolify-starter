@@ -38,27 +38,29 @@ export default async function Home() {
         <strong>내 앱 데이터베이스</strong>에 저장됩니다.
       </p>
 
-      {/* 방명록 입력 — 내 앱 DB(Postgres + Prisma) 사용 */}
-      <form action={addEntry} className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <input
-          name="nickname"
-          placeholder="닉네임"
-          className="rounded-lg border border-gray-300 px-3 py-2 sm:w-32 dark:border-gray-700 dark:bg-gray-900"
-          required
-        />
-        <input
-          name="message"
-          placeholder="한 줄 남기기"
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900"
-          required
-        />
-        <button
-          type="submit"
-          className="rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700"
-        >
-          남기기
-        </button>
-      </form>
+      {/* 방명록 입력 — 내 앱 DB(Postgres + Prisma) 사용. DB가 없으면 폼 대신 안내만 보여줍니다. */}
+      {!error && (
+        <form action={addEntry} className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <input
+            name="nickname"
+            placeholder="닉네임"
+            className="rounded-lg border border-gray-300 px-3 py-2 sm:w-32 dark:border-gray-700 dark:bg-gray-900"
+            required
+          />
+          <input
+            name="message"
+            placeholder="한 줄 남기기"
+            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900"
+            required
+          />
+          <button
+            type="submit"
+            className="rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700"
+          >
+            남기기
+          </button>
+        </form>
+      )}
 
       {error ? (
         <p className="mt-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-200">
