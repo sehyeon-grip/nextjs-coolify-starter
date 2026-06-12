@@ -17,13 +17,14 @@ description: 만든 앱을 사내 Coolify에 배포할 때 사용. 환경변수(
    - `.env` 파일에서 **키 이름만** 읽어옵니다. (예: `DATABASE_URL`, `METABASE_URL`, `METABASE_API_KEY`)
    - **값은 절대 화면에 출력하지 않습니다.** 이름 목록만 보여줍니다.
    - 사용자에게 안내: "Coolify → 내 앱 → **Environment Variables** 에 아래 이름들을 **같은 이름으로** 넣으세요."
-     - [ ] `DATABASE_URL` — Coolify가 만든 Postgres의 연결 주소
+     - [ ] `DATABASE_URL` — **데이터 저장 기능을 쓸 때만.** 안 쓰면 비워도 되고, 그러면 화면만 배포됩니다.
      - [ ] `METABASE_URL`, `METABASE_API_KEY` — 회사 데이터를 쓸 때만 (리더가 발급)
    - "값은 어디서 와요?"라고 물으면: DB 주소는 Coolify Postgres 생성 시 제공, Metabase 값은 리더가 발급.
 
-3. **데이터베이스 준비**
-   - Coolify에서 **PostgreSQL을 하나 추가**하도록 안내합니다(원클릭). 생성되면 연결 주소를 `DATABASE_URL`에 넣습니다.
-   - 이 보일러플레이트는 배포될 때 마이그레이션(`prisma migrate deploy`)이 **자동 적용**됩니다(Dockerfile). 따로 실행할 필요 없습니다.
+3. **데이터베이스 (선택 — 데이터를 저장할 때만)**
+   - 데이터 저장이 필요 없으면 이 단계는 건너뜁니다. `DATABASE_URL` 없이도 앱은 정상 배포됩니다.
+   - 저장이 필요하면: Coolify에서 **PostgreSQL을 하나 추가**(원클릭)하고 연결 주소를 `DATABASE_URL`에 넣습니다.
+   - 그러면 배포될 때마다 데이터 구조가 **자동으로 DB에 반영(`prisma db push`)**됩니다(Dockerfile). 따로 실행할 필요 없습니다. ("마이그레이션"을 따로 돌릴 필요 없음)
 
 4. **배포 방식 확인**
    - Coolify에서 이 앱은 **Dockerfile** 로 빌드됩니다(저장소에 포함됨). 빌드 방식이 Dockerfile로 잡혀 있는지 확인하도록 안내합니다.
@@ -31,7 +32,7 @@ description: 만든 앱을 사내 Coolify에 배포할 때 사용. 환경변수(
 
 5. **배포 & 확인**
    - 배포를 트리거하고, 빌드 로그에서 에러가 없는지 봅니다. 끝나면 접속 주소를 열어 화면이 뜨는지 확인합니다.
-   - 화면이 "데이터베이스가 준비되지 않았어요"로 뜨면 → `DATABASE_URL`이 비었거나 틀린 경우. 2~3단계를 다시 확인합니다.
+   - 데이터 저장 기능을 켰는데 안 되면 → `DATABASE_URL`이 비었거나 틀린 경우. 2~3단계를 다시 확인합니다. (저장을 안 쓸 거면 화면만 떠도 정상)
 
 ## 규칙
 

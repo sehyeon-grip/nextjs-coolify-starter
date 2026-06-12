@@ -26,7 +26,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# 시작 시 DB 마이그레이션을 적용하기 위한 최소 도구
+# (선택) 데이터 저장 기능을 쓸 때만 필요한 최소 도구 — DB 없이도 앱은 돌아갑니다
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
@@ -35,5 +35,7 @@ COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 EXPOSE 3000
 
-# 배포될 때마다: DB 스키마 적용 → 서버 시작
-CMD ["sh", "-c", "node_modules/prisma/build/index.js migrate deploy; node server.js"]
+# 배포될 때마다:
+#  - DATABASE_URL이 있으면 → 데이터베이스 모양을 코드에 맞춰 자동 반영(db push)
+#  - 없으면 → 그냥 서버만 시작 (데이터 저장 기능은 꺼진 상태로 화면은 정상)
+CMD ["sh", "-c", "if [ -n \"$DATABASE_URL\" ]; then node_modules/prisma/build/index.js db push --skip-generate --accept-data-loss; fi; node server.js"]

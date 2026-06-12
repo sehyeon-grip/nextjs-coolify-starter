@@ -18,11 +18,11 @@ async function loadEntries(): Promise<{ entries: Entry[]; error: string | null }
     });
     return { entries, error: null };
   } catch {
-    // DB가 아직 준비되지 않았을 때도 화면은 떠야 하니까, 친절하게 안내만 합니다.
+    // DB가 연결되지 않았을 때도 화면은 정상으로 떠야 합니다. (저장 기능만 꺼진 상태)
     return {
       entries: [],
       error:
-        "아직 데이터베이스가 준비되지 않았어요. README의 '시작하기'를 따라 .env의 DATABASE_URL을 설정하고 `npx prisma migrate dev`를 실행해 주세요.",
+        "💾 데이터 저장 기능은 데이터베이스를 연결하면 켜져요. 지금은 화면만 동작합니다. (Claude에게 \"방명록을 저장되게 해줘\"라고 하면 안내해줍니다)",
     };
   }
 }

@@ -37,12 +37,9 @@
    - 어떤 값을 채워야 하는지 한국어로 하나씩 설명해줘
    - (실제 비밀값은 네가 만들지 말고, 내가 직접 넣도록 안내만)
 
-5. 데이터베이스 준비
-   - `npx prisma generate` 실행
-   - 로컬 데이터베이스 연결 방법 안내 후, 준비되면 `npx prisma migrate dev` 도와줘
-
-6. 동작 확인
+5. 동작 확인
    - `npm run dev` 실행해서 화면이 뜨는지 확인하고 접속 주소(localhost) 알려줘
+   - (데이터 저장은 나중에 — 처음엔 데이터베이스 없이 화면만 떠도 정상입니다)
 
 각 단계마다 비전공자도 알 수 있게 한국어로 짧게 설명하고,
 내가 직접 해야 할 게 있으면 멈추고 알려줘.
@@ -84,8 +81,8 @@
 ## 💻 명령어 (참고용 — 보통은 Claude에게 부탁하면 됩니다)
 
 ```bash
-npm install              # 패키지 설치
-npm run dev              # 개발 서버 (localhost:3000)
-npx prisma migrate dev   # DB 구조 변경 적용
-npm run build            # 배포용 빌드
+npm install        # 패키지 설치
+npm run dev        # 개발 서버 (localhost:3000)
+npx prisma db push # (데이터 저장 쓸 때만) 데이터 구조를 DB에 반영
+npm run build      # 배포용 빌드
 ```
